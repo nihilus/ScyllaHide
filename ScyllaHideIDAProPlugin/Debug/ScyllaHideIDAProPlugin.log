@@ -1,0 +1,33 @@
+﻿  wstring.c
+  textdefs.c
+  prefix.c
+  operands.c
+  mnemonics.c
+  insts.c
+  instructions.c
+  distorm.c
+  decoder.c
+  Generating Code...
+  ScyllaHideIDAProPlugin.cpp
+  IdaServerClient.cpp
+  UpdateCheck.cpp
+  OptionsDialog.cpp
+c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(959): warning C4996: 'set_ti': was declared deprecated
+          c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(958) : see declaration of 'set_ti'
+c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(962): warning C4996: 'set_op_ti': was declared deprecated
+          c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(961) : see declaration of 'set_op_ti'
+  Injector.cpp
+  IniSettings.cpp
+  AttachDialog.cpp
+c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(959): warning C4996: 'set_ti': was declared deprecated
+          c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(958) : see declaration of 'set_ti'
+c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(962): warning C4996: 'set_op_ti': was declared deprecated
+          c:\hex-rays.ida.pro.advanced.v6.5\idasdk\plugins\scyllahide\scyllahideidaproplugin\idasdk\nalt.hpp(961) : see declaration of 'set_op_ti'
+  RemotePebHider.cpp
+  RemoteHook.cpp
+  ReadNtConfig.cpp
+  DynamicMapping.cpp
+  ApplyHooking.cpp
+  Generating Code...
+     Creating library C:\Hex-Rays.IDA.Pro.Advanced.v6.5\idasdk\plugins\ScyllaHide\Debug\plugins\ScyllaHideIDA.lib and object C:\Hex-Rays.IDA.Pro.Advanced.v6.5\idasdk\plugins\ScyllaHide\Debug\plugins\ScyllaHideIDA.exp
+  ScyllaHideIDAProPlugin.vcxproj -> C:\Hex-Rays.IDA.Pro.Advanced.v6.5\idasdk\plugins\ScyllaHide\Debug\plugins\ScyllaHideIDA.plw
