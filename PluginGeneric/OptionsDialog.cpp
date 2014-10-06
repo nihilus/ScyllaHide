@@ -41,7 +41,9 @@ wchar_t DllPathForInjection[MAX_PATH] = {0};
 
 void createExceptionWindow(HWND hwnd);
 void ResetAllExceptions();
+#if defined(OLLY1) || defined(OLLY2)
 void HandleGuiException(HWND hwnd);
+#endif
 
 void ShowAbout(HWND hWnd)
 {
@@ -169,8 +171,9 @@ void UpdateOptions(HWND hWnd)
     else EnableWindow(GetDlgItem(hWnd, IDC_INJECTDLL), FALSE);
 #endif
 
-
+#if defined(OLLY1) || defined(OLLY2)
 	HandleGuiException(hWnd);
+#endif
 }
 
 void SaveOptions(HWND hWnd)
@@ -777,6 +780,7 @@ INT_PTR CALLBACK OptionsProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             SaveOptions(hWnd);
             break;
         }
+#if defined(OLLY1) || defined(OLLY2)
 		case IDC_EXCEPTION_ALL:
 			{
 				ResetAllExceptions();
@@ -793,6 +797,7 @@ INT_PTR CALLBACK OptionsProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 					pHideOptions.handleExceptionWx86Breakpoint = 1;
 				}
 			}
+#endif
         case IDC_PROTECTDRX:
         {
             WPARAM state;
@@ -957,12 +962,14 @@ INT_PTR CALLBACK OptionsProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
             break;
         }
 #endif
+#if defined(OLLY1) || defined(OLLY2)
 		case IDC_SELECT_EXCEPTIONS:
 			{
 				createExceptionWindow(hWnd);
 				HandleGuiException(hWnd);
 				break;
 			}
+#endif
     }
 
 }
@@ -976,7 +983,7 @@ default:
 
     return 0;
 }
-
+#if defined(OLLY1) || defined(OLLY2)
 void HandleGuiException(HWND hwnd)
 {
 #ifdef OLLY1
@@ -1004,6 +1011,7 @@ void HandleGuiException(HWND hwnd)
 			CheckDlgButton(hwnd, IDC_EXCEPTION_ALL, 0);
 		}
 }
+#endif
 
 typedef struct _NAME_TOOLTIP {
 	const WCHAR * name;
