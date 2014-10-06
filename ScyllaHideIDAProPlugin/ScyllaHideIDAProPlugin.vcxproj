@@ -59,7 +59,7 @@
       <BufferSecurityCheck>true</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CallingConvention>StdCall</CallingConvention>
-      <AdditionalIncludeDirectories>./idasdk</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./idasdk/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <StructMemberAlignment>1Byte</StructMemberAlignment>
     </ClCompile>
     <Link>
@@ -90,8 +90,8 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)ntdll</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)ntdll;./idasdk/x86_win_vc_32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ida.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/EXPORT:PLUGIN %(AdditionalOptions)</AdditionalOptions>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
     </Link>
