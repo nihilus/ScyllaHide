@@ -53,6 +53,16 @@ struct HideOptions
     int skipCompressedDoNothing;
     int skipLoadDllDoLoad;
     int skipLoadDllDoNothing;
+    int advancedInfobar;
+    int handleExceptionPrint;
+    int handleExceptionRip;
+    int handleExceptionInvalidLockSequence;
+	int handleExceptionIllegalInstruction;
+	int handleExceptionNoncontinuableException;
+	int handleExceptionAssertionFailure;
+	int handleExceptionBreakpoint;
+	int handleExceptionWx86Breakpoint;
+	int handleExceptionGuardPageViolation;
 };
 
 void InstallAntiAttachHook();
@@ -64,6 +74,7 @@ void FillExchangeStruct(HANDLE hProcess, HOOK_DLL_EXCHANGE * data);
 void StartFixBeingDebugged(DWORD targetPid, bool setToNull);
 bool ApplyAntiAntiAttach(DWORD targetPid);
 
+DWORD_PTR GetAddressOfEntryPoint( BYTE * dllMemory );
 bool IsProcessWOW64(HANDLE hProcess);
 bool isWindows64();
 bool RemoveDebugPrivileges(HANDLE hProcess);

@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "olly1patches.h"
 #include <Windows.h>
 #include <TlHelp32.h>
@@ -24,6 +25,9 @@ char orgExpression[100];
 DWORD pOrgExpr;
 int selectedType;
 DWORD buffer = 0;
+
+HWND hDump;
+HWND hDasm;
 
 //taken from strongOD aka "fix NumOfRvaAndSizes"
 void fixBadPEBugs()
@@ -675,4 +679,111 @@ void fixFaultyHandleOnExit()
     BYTE faultyHandleFix[] = {0xEB}; //JNZ (75 4D) to JMP (EB 4D)
     fixed = WriteProcessMemory(hOlly, (LPVOID)(lpBaseAddr+0x7599f), &faultyHandleFix, sizeof(faultyHandleFix), NULL);
     if(fixed) _Addtolist(0,-1,"Fixed ERROR_ACCESS_DENIED with faulty handle at 0x7599f");
+}
+
+void hookOllyWindowProcs()
+{
+    t_dump* dump = (t_dump*) _Plugingetvalue(VAL_CPUDDUMP);
+    t_dump* dasm = (t_dump*) _Plugingetvalue(VAL_CPUDASM);
+    hDump = dump->table.hw;
+    hDasm = dasm->table.hw;
+
+    DWORD hookedProc = (DWORD)hookedOllyWindowProc;
+    LONG hOllyDumpProc = SetWindowLong(hDump, GWL_WNDPROC, (LONG)hookedProc);
+    SetWindowLong(hDump, GWL_USERDATA, hOllyDumpProc);
+    LONG hOllyDasmProc = SetWindowLong(hDasm, GWL_WNDPROC, (LONG)hookedProc);
+    SetWindowLong(hDasm, GWL_USERDATA, hOllyDasmProc);
+}
+
+void hookedOllyWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    int window = 0;
+    if(hWnd == hDasm) {
+        window = VAL_CPUDASM;
+    } else {
+        window = VAL_CPUDDUMP;
+    }
+    t_dump* dump = (t_dump*) _Plugingetvalue(window);
+
+	if (!dump)
+	{
+		MessageBoxW(hWnd, L"t_dump is NULL", L"Error", MB_ICONERROR);
+		CallWindowProc((WNDPROC)GetWindowLong(hWnd, GWL_USERDATA), hWnd, message, wParam, lParam);
+		return;
+	}
+
+    if((message == WM_LBUTTONUP ||
+            ((message == WM_LBUTTONDOWN || WM_MOUSEMOVE) && wParam == MK_LBUTTON)) &&
+            pHideOptions.advancedInfobar
+      )  {
+        DWORD startAddr = dump->sel0;
+        DWORD endAddr = dump->sel1;
+
+        t_module* module = _Findmodule(startAddr);
+
+        char modName[20] = "unknown";
+        char sectName[20] = "unknown";
+        if(module != NULL) 
+		{
+			ZeroMemory(modName, sizeof(modName));
+            strncpy(modName, module->name, SHORTLEN);
+
+            IMAGE_SECTION_HEADER* hdr = module->sect;
+            for(int i=0; i<module->nsect; i++) {
+                if((hdr->VirtualAddress+module->base) < startAddr && (hdr->VirtualAddress+module->base+hdr->Misc.VirtualSize) > startAddr) {
+                    ZeroMemory(sectName, sizeof(sectName));
+					strncpy(sectName, (char*)hdr->Name, SHORTLEN);
+                    break;
+                }
+
+                hdr++;
+            }
+        }
+
+        _Infoline("VA: 0x%08X -> 0x%08X | Size: 0x%08X Bytes | Module: [%s]%s", startAddr, endAddr, endAddr-startAddr, modName, sectName);
+    }
+    else if(message == WM_KEYUP) {
+        switch(wParam) {
+        case VK_DELETE: {
+                DWORD startAddr = dump->sel0;
+                DWORD endAddr = dump->sel1;
+
+				if (dump->backup == 0)
+				{
+					_Dumpbackup(dump, BKUP_CREATE);
+				}
+				
+
+                BYTE nop[1] = {0x90};
+            while(startAddr < endAddr) {
+            _Writememory(nop, startAddr, sizeof(BYTE), MM_RESTORE | MM_DELANAL);
+                startAddr++;
+            }
+
+        break;
+        }
+        case VK_INSERT: {
+                DWORD startAddr = dump->sel0;
+                DWORD endAddr = dump->sel1;
+
+				if (dump->backup == 0)
+				{
+					_Dumpbackup(dump, BKUP_CREATE);
+				}
+
+                BYTE zero[1] = {0x00};
+            while(startAddr < endAddr) {
+            _Writememory(zero, startAddr, sizeof(BYTE), MM_RESTORE | MM_DELANAL);
+                startAddr++;
+            }
+        break;
+        }
+        default: {
+                break;
+            }
+            }
+    }
+
+    //forward the call to Olly
+    CallWindowProc((WNDPROC)GetWindowLong(hWnd, GWL_USERDATA), hWnd, message, wParam, lParam);
 }
