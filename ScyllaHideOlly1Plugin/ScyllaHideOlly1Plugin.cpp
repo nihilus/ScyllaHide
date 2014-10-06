@@ -11,12 +11,18 @@
 #include "..\PluginGeneric\IniSettings.h"
 #include "..\PluginGeneric\OptionsDialog.h"
 #include "..\PluginGeneric\AttachDialog.h"
+#include "..\PluginGeneric\CustomExceptionHandler.h"
 
 typedef void (__cdecl * t_AttachProcess)(DWORD dwPID);
 typedef void (__cdecl * t_LogWrapper)(const WCHAR * format, ...);
+typedef void (__cdecl * t_SetDebuggerBreakpoint)(DWORD_PTR address);
+typedef bool (__cdecl * t_IsAddressBreakpoint)(DWORD_PTR address);
+
 void LogWrapper(const WCHAR * format, ...);
 void LogErrorWrapper(const WCHAR * format, ...);
 void AttachProcess(DWORD dwPID);
+void SetDebuggerBreakpoint(DWORD_PTR address);
+bool __cdecl IsAddressBreakpoint(DWORD_PTR address);
 
 //scyllaHide definitions
 struct HideOptions pHideOptions = {0};
@@ -32,6 +38,7 @@ DWORD_PTR epaddr = 0;
 bool bHooked = false;
 static bool bEPBreakRemoved = false;
 HWND hwmain; // Handle of main OllyDbg window
+bool bHookedDumpProc = false;
 
 WCHAR ScyllaHideDllPath[MAX_PATH] = {0};
 WCHAR NtApiIniPath[MAX_PATH] = {0};
@@ -43,19 +50,23 @@ extern HOOK_DLL_EXCHANGE DllExchangeLoader;
 extern t_LogWrapper LogWrap;
 extern t_LogWrapper LogErrorWrap;
 extern t_AttachProcess _AttachProcess;
+extern t_SetDebuggerBreakpoint _SetDebuggerBreakpoint;
+extern t_IsAddressBreakpoint _IsAddressBreakpoint;
 
 HMODULE hNtdllModule = 0;
 bool specialPebFix = false;
 LPVOID ImageBase = 0;
 
+bool executeOnce = false;
+
 BOOL WINAPI DllMain(HINSTANCE hi,DWORD reason,LPVOID reserved)
 {
     if (reason==DLL_PROCESS_ATTACH)
     {
-		_AttachProcess = AttachProcess;
+        _AttachProcess = AttachProcess;
         LogWrap = LogWrapper;
         LogErrorWrap = LogErrorWrapper;
-
+		_IsAddressBreakpoint = IsAddressBreakpoint;
         hNtdllModule = GetModuleHandleW(L"ntdll.dll");
         GetModuleFileNameW(hi, NtApiIniPath, _countof(NtApiIniPath));
         WCHAR *temp = wcsrchr(NtApiIniPath, L'\\');
@@ -292,29 +303,51 @@ extern "C" void __declspec(dllexport) _ODBG_Pluginmainloop(DEBUG_EVENT *debugeve
     {
     case CREATE_PROCESS_DEBUG_EVENT:
     {
+
+        if (pHideOptions.handleExceptionPrint || 
+            pHideOptions.handleExceptionRip ||
+            pHideOptions.handleExceptionIllegalInstruction ||
+            pHideOptions.handleExceptionInvalidLockSequence ||
+            pHideOptions.handleExceptionNoncontinuableException ||
+			pHideOptions.handleExceptionBreakpoint ||
+			pHideOptions.handleExceptionWx86Breakpoint ||
+			pHideOptions.handleExceptionGuardPageViolation
+			)
+        {
+            if (executeOnce == false)
+            {
+                HookDebugLoop();
+                executeOnce = true;
+            }
+        }
+
         ImageBase = debugevent->u.CreateProcessInfo.lpBaseOfImage;
         ProcessId=debugevent->dwProcessId;
         bHooked = false;
         epaddr = (DWORD_PTR)debugevent->u.CreateProcessInfo.lpStartAddress;
 
-		if (epaddr == NULL)
-		{
-			//ATTACH to an existing process!
-			//Apply anti-anti-attach
-			 if(pHideOptions.killAntiAttach)
-			 {
-				 if (!ApplyAntiAntiAttach(ProcessId))
-				 {
-					 MessageBoxW(hwmain, L"Anti-Anti-Attach failed", L"Error", MB_ICONERROR);
-				 }
-			 }
-		}
+        if (epaddr == NULL)
+        {
+            //ATTACH to an existing process!
+            //Apply anti-anti-attach
+            if(pHideOptions.killAntiAttach)
+            {
+                if (!ApplyAntiAntiAttach(ProcessId))
+                {
+                    MessageBoxW(hwmain, L"Anti-Anti-Attach failed", L"Error", MB_ICONERROR);
+                }
+            }
+        }
 
         ZeroMemory(&DllExchangeLoader, sizeof(HOOK_DLL_EXCHANGE));
 
         //change olly caption again !
         SetWindowTextW(hwmain, pHideOptions.ollyTitle);
 
+        if(!bHookedDumpProc) {
+            hookOllyWindowProcs();
+            bHookedDumpProc = true;
+        }
         hookOllyBreakpoints();
     }
     break;
@@ -396,12 +429,42 @@ void LogWrapper(const WCHAR * format, ...)
 
 void AttachProcess(DWORD dwPID)
 {
-	int result = _Attachtoactiveprocess((int)dwPID);
+    int result = _Attachtoactiveprocess((int)dwPID);
 
-	if (result != 0)
+    if (result != 0)
+    {
+        MessageBoxW(hwmain,
+                    L"Can't attach to that process !",
+                    L"ScyllaHide Plugin",MB_OK|MB_ICONERROR);
+    }
+}
+
+bool __cdecl IsAddressBreakpoint(DWORD_PTR address)
+{
+	t_table* pTable=(t_table*)_Plugingetvalue(VAL_BREAKPOINTS);
+	if(pTable)
 	{
-		MessageBoxW(hwmain,
-			L"Can't attach to that process !",
-			L"ScyllaHide Plugin",MB_OK|MB_ICONERROR);
+		t_sorted* pSorted = &(pTable->data);
+			for(int i=0;i<pTable->data.n;i++)
+			{
+				t_bpoint* bp=(t_bpoint*)_Getsortedbyselection(pSorted,i);
+				if (bp)
+				{
+					//char text[100];
+					//wsprintfA(text,"%X %X",bp->addr,address);
+					//MessageBoxA(0,text,text,0);
+					if (bp->addr == address)
+					{
+						return true;
+					}
+				}
+			}
 	}
+
+	return false;
+}
+
+void SetDebuggerBreakpoint(DWORD_PTR address)
+{
+
 }
