@@ -120,16 +120,6 @@ void CreateDefaultSettings(const WCHAR * iniFile)
     WriteIniSettings(L"RemoveDebugPrivileges", L"1", iniFile);
     WriteIniSettings(L"KillAntiAttach", L"1", iniFile);
 
-    WriteIniSettings(L"handleExceptionPrint", L"1", iniFile);
-    WriteIniSettings(L"handleExceptionRip", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionInvalidLockSequence", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionIllegalInstruction", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionNoncontinuableException", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionAssertionFailure", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionBreakpoint", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionWx86Breakpoint", L"1", iniFile);
-	WriteIniSettings(L"handleExceptionGuardPageViolation", L"1", iniFile);
-
     //ida specific
     WriteIniSettings(L"AutostartServer", L"1", iniFile);
     WriteIniSettings(L"ServerPort", L"1337", iniFile);
@@ -147,7 +137,6 @@ void CreateDefaultSettings(const WCHAR * iniFile)
     WriteIniSettings(L"skipCompressedDoNothing", L"0", iniFile);
     WriteIniSettings(L"skipLoadDllDoLoad", L"0", iniFile);
     WriteIniSettings(L"skipLoadDllDoNothing", L"0", iniFile);
-    WriteIniSettings(L"advancedInfobar", L"0", iniFile);
 }
 
 void ReadSettingsFromIni(const WCHAR * iniFile)
@@ -187,16 +176,6 @@ void ReadSettingsFromIni(const WCHAR * iniFile)
     pHideOptions.removeDebugPrivileges = ReadIniSettingsInt(L"RemoveDebugPrivileges", iniFile);
     pHideOptions.killAntiAttach = ReadIniSettingsInt(L"KillAntiAttach", iniFile);
 
-    pHideOptions.handleExceptionPrint = ReadIniSettingsInt(L"handleExceptionPrint", iniFile);
-    pHideOptions.handleExceptionRip = ReadIniSettingsInt(L"handleExceptionRip", iniFile);
-	pHideOptions.handleExceptionIllegalInstruction = ReadIniSettingsInt(L"handleExceptionIllegalInstruction", iniFile);
-	pHideOptions.handleExceptionInvalidLockSequence = ReadIniSettingsInt(L"handleExceptionInvalidLockSequence", iniFile);
-	pHideOptions.handleExceptionNoncontinuableException = ReadIniSettingsInt(L"handleExceptionNoncontinuableException", iniFile);
-	pHideOptions.handleExceptionAssertionFailure = ReadIniSettingsInt(L"handleExceptionAssertionFailure", iniFile);
-	pHideOptions.handleExceptionBreakpoint = ReadIniSettingsInt(L"handleExceptionBreakpoint", iniFile);
-	pHideOptions.handleExceptionGuardPageViolation = ReadIniSettingsInt(L"handleExceptionGuardPageViolation", iniFile);
-	pHideOptions.handleExceptionWx86Breakpoint = ReadIniSettingsInt(L"handleExceptionWx86Breakpoint", iniFile);
-
     if (pHideOptions.DLLNormal)
     {
         pHideOptions.DLLStealth = 0;
@@ -218,7 +197,6 @@ void ReadSettingsFromIni(const WCHAR * iniFile)
     pHideOptions.skipCompressedDoNothing = ReadIniSettingsInt(L"skipCompressedDoNothing", iniFile);
     pHideOptions.skipLoadDllDoLoad = ReadIniSettingsInt(L"skipLoadDllDoLoad", iniFile);
     pHideOptions.skipLoadDllDoNothing = ReadIniSettingsInt(L"skipLoadDllDoNothing", iniFile);
-    pHideOptions.advancedInfobar = ReadIniSettingsInt(L"advancedInfobar", iniFile);
     ReadIniSettings(L"WindowTitle", iniFile, pHideOptions.ollyTitle, _countof(pHideOptions.ollyTitle));
 }
 
@@ -259,17 +237,6 @@ void SaveSettingsToIni(const WCHAR * iniFile)
     WriteIniSettingsInt(L"RemoveDebugPrivileges", pHideOptions.removeDebugPrivileges, iniFile);
     WriteIniSettingsInt(L"KillAntiAttach", pHideOptions.killAntiAttach, iniFile);
 
-    WriteIniSettingsInt(L"handleExceptionPrint", pHideOptions.handleExceptionPrint, iniFile);
-    WriteIniSettingsInt(L"handleExceptionRip", pHideOptions.handleExceptionRip, iniFile);
-	WriteIniSettingsInt(L"handleExceptionIllegalInstruction", pHideOptions.handleExceptionIllegalInstruction, iniFile);
-	WriteIniSettingsInt(L"handleExceptionInvalidLockSequence", pHideOptions.handleExceptionInvalidLockSequence, iniFile);
-	WriteIniSettingsInt(L"handleExceptionNoncontinuableException", pHideOptions.handleExceptionNoncontinuableException, iniFile);
-	WriteIniSettingsInt(L"handleExceptionAssertionFailure", pHideOptions.handleExceptionAssertionFailure, iniFile);
-	WriteIniSettingsInt(L"handleExceptionBreakpoint", pHideOptions.handleExceptionBreakpoint, iniFile);
-	WriteIniSettingsInt(L"handleExceptionGuardPageViolation", pHideOptions.handleExceptionGuardPageViolation, iniFile);
-	WriteIniSettingsInt(L"handleExceptionWx86Breakpoint", pHideOptions.handleExceptionWx86Breakpoint, iniFile);
-
-
     //ida specific
     WriteIniSettingsInt(L"AutostartServer", pHideOptions.autostartServer, iniFile);
     WriteIniSettings(L"ServerPort", pHideOptions.serverPort, iniFile);
@@ -287,7 +254,6 @@ void SaveSettingsToIni(const WCHAR * iniFile)
     WriteIniSettingsInt(L"skipCompressedDoNothing", pHideOptions.skipCompressedDoNothing, iniFile);
     WriteIniSettingsInt(L"skipLoadDllDoLoad", pHideOptions.skipLoadDllDoLoad, iniFile);
     WriteIniSettingsInt(L"skipLoadDllDoNothing", pHideOptions.skipLoadDllDoNothing, iniFile);
-    WriteIniSettingsInt(L"advancedInfobar", pHideOptions.advancedInfobar, iniFile);
 }
 
 void GetProfileNames(char* profileNamesA)

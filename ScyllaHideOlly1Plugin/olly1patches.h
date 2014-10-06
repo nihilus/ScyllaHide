@@ -21,7 +21,6 @@ void skipCompressedCode();
 void skipLoadDll();
 void fixNTSymbols();
 void fixFaultyHandleOnExit();
-void hookOllyWindowProcs();
 
 //hooks
 void handleBreakpoints();
@@ -29,4 +28,3 @@ void handleSprintf();
 void advancedCtrlG_WMINIT();
 void advancedCtrlG_WMCOMMAND();
 void advancedCtrlG_Save();
-void hookedOllyWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
